@@ -188,6 +188,7 @@ def NNBackward(x, y, alpha, beta, z, y_hat):
     return (g_alpha, g_beta, g_b,g_z,g_a)
 
 
+
 def SGD(X_train, y_train, X_val, y_val, hidden_units, num_epochs, init_rand, learning_rate):
     """
     :param X_train: Training data input (ndarray with shape (N_train, M))
@@ -206,8 +207,58 @@ def SGD(X_train, y_train, X_val, y_val, hidden_units, num_epochs, init_rand, lea
         - train_entropy (length num_epochs): mean cross-entropy loss for training data for each epoch
         - valid_entropy (length num_epochs): mean cross-entropy loss for validation data for each epoch
     """
-    pass
+    K = 10 
+    M = len(X_train[0]) 
+    
+    def J_SGD(alpha, beta, x,y): 
+        x = np.vstack([[1], x.reshape((M, -1))])
+        (_,_,_,_, _, J) = NNForward(x, y, alpha, beta)
+        return J
 
+    D = hidden_units
+    alpha = np.zeros((D,M))
+    beta = np.zeros((K,D))
+    alpha = np.append(np.zeros((D, 1)), alpha, axis=1)
+    beta = np.append(np.zeros((K, 1)), beta, axis=1)
+    if init_rand: 
+        func_init = np.vectorize(lambda x: np.random.uniform(-0.1,0.1)) 
+        alpha = func_init(alpha) 
+        beta = func_init(beta)
+    losses_train = [] 
+    losses_val = [] 
+    N_train = len(X_train)
+    N_val = len(X_val)
+    func = np.vectorize(lambda x: x*math.log(x))
+    for i in range(num_epochs): 
+        # print("hi")
+        # print(N_train)
+        for j in range(N_train): 
+            # print(j)
+            x = X_train[j] 
+            y = y_train[j]
+            x = np.vstack([[1], x.reshape((M, -1))])
+            (x,_, z,_, y_hat, J) = NNForward(x,y,alpha,beta) 
+            # print(np.shape(x), np.shape(y), np.shape(alpha), np.shape(beta), np.shape(z),np.shape(y_hat))
+            (g_alpha, g_beta, g_b,g_z,g_a) = NNBackward(x,y,alpha,beta,z,y_hat)
+            # print("hi2")
+            alpha = np.subtract(alpha,learning_rate*g_alpha)
+            beta = np.subtract(beta,learning_rate*g_beta)
+            # print("hi1")
+        
+        J_train = [] 
+        J_val = [] 
+        for p in range(N_train): 
+            J_train += [J_SGD(alpha,beta, X_train[p], y_train[p])]
+        for p in range(N_val):
+            J_val += [J_SGD(alpha,beta, X_val[p], y_val[p])]
+        losses_train += [sum(J_train)/ len(J_train)]
+        losses_val += [sum(J_val)/len(J_val)]
+        
+    return alpha,beta,losses_train,losses_val 
+
+
+
+            
 
 def prediction(X_train, y_train, X_val, y_val, tr_alpha, tr_beta):
     """
