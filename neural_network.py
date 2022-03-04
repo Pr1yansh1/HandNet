@@ -124,7 +124,8 @@ def softmaxBackward(hot_y, y_hat):
     :param hot_y: 1-hot vector for true label
     :param y_hat: vector of probabilistic distribution for predicted label
     """
-    pass
+    y_hat[hot_y, 0] -= 1
+    return y_hat
 
 
 def linearBackward(prev, p, grad_curr):
@@ -137,7 +138,13 @@ def linearBackward(prev, p, grad_curr):
         - grad_prevl: gradients for previous layer
     TIP: Check your dimensions.
     """
-    pass
+    ok = np.transpose(prev)
+    grad_param = np.matmul(grad_curr,ok ) 
+    #remove the bias term i.e. the first column 
+    beta_star = p[:,1:]
+    v = np.transpose(beta_star)
+    grad_prev1 = np.matmul(v, grad_curr)
+    return grad_param, grad_prev1
 
 
 def sigmoidBackward(curr, grad_curr):
@@ -147,7 +154,12 @@ def sigmoidBackward(curr, grad_curr):
     :return: grad_prevl: gradients for previous layer
     TIP: Check your dimensions
     """
-    pass
+    def helper(x,y): 
+        return x*(y**2)*((1/y) - 1)
+
+    func = np.vectorize(helper)
+
+    return func(grad_curr, curr)
 
 
 def NNBackward(x, y, alpha, beta, z, y_hat):
@@ -166,8 +178,14 @@ def NNBackward(x, y, alpha, beta, z, y_hat):
         - g_a: gradients for layer a (sigmoidBackward)
     TIP: Make sure you're accounting for the changes due to the bias term
     """
-    pass
 
+    #returns partial derivative vector wrt b
+    
+    g_b = softmaxBackward(y, y_hat) 
+    g_beta, g_z = linearBackward(z, beta, g_b) 
+    g_a = sigmoidBackward(np.delete(z,0,0),g_z) 
+    g_alpha, g_x = linearBackward(x,alpha,g_a)
+    return (g_alpha, g_beta, g_b,g_z,g_a)
 
 
 def SGD(X_train, y_train, X_val, y_val, hidden_units, num_epochs, init_rand, learning_rate):
