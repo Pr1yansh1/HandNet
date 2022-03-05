@@ -335,12 +335,9 @@ def train_and_valid(X_train, y_train, X_val, y_val, num_epochs, num_hidden, init
         - y_hat_val: A list of integers representing the predicted labels for validation data
     """
     ### YOUR CODE HERE
-    loss_per_epoch_train = []
-    loss_per_epoch_val = []
-    err_train = None
-    err_val = None
-    y_hat_train = None
-    y_hat_val = None
- 
-    return (loss_per_epoch_train, loss_per_epoch_val,
-            err_train, err_val, y_hat_train, y_hat_val)
+
+    alpha,beta,losses_train,losses_val  = SGD(X_train, y_train, X_val, y_val, num_hidden, num_epochs, init_rand, learning_rate)
+    train_error, valid_error, y_hat_train, y_hat_valid = prediction(X_train, y_train, X_val, y_val, alpha, beta)
+
+    return (losses_train, losses_val,
+            train_error, valid_error, y_hat_train, y_hat_valid)
