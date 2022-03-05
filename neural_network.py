@@ -274,7 +274,40 @@ def prediction(X_train, y_train, X_val, y_val, tr_alpha, tr_beta):
         - y_hat_train: predicted labels for training data (list)
         - y_hat_valid: predicted labels for validation data (list)
     """
-    pass
+    N_train = len(X_train)
+    N_val = len(X_val)
+
+    M = len(X_train[0]) 
+    train_error = 0 
+    valid_error = 0
+    y_hat_train = [] 
+    y_hat_valid = [] 
+    for i in range(N_train): 
+        x = X_train[i] 
+        x = np.vstack([[1], x.reshape((M, -1))])
+        y = y_train[i] 
+        (_,_, _,_, y_hat, _) = NNForward(x,y,tr_alpha,tr_beta)
+        l = np.argmax(y_hat) 
+        if (l != y): 
+            train_error += 1 
+        y_hat_train += [l]
+
+    for i in range(N_val): 
+        x = X_val[i] 
+        x = np.vstack([[1], x.reshape((M, -1))])
+        y = y_val[i] 
+        (_,_, _,_, y_hat, _) = NNForward(x,y,tr_alpha,tr_beta)
+        l = np.argmax(y_hat) 
+        if (l != y): 
+            valid_error += 1 
+        y_hat_valid += [l]
+
+    train_error = train_error/N_train 
+    valid_error = valid_error/N_val 
+
+    return train_error, valid_error, y_hat_train, y_hat_valid
+
+
 
 ### FEEL FREE TO WRITE ANY HELPER FUNCTIONS
 
