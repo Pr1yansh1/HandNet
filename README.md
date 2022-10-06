@@ -1,4 +1,4 @@
 # HandNet 
 
 
-Handwriting Recognition System with a neural network written from scratch. 
+Handwriting Recognition System with a neural network written from scratch using just numpy. 
