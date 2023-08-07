@@ -1,4 +1,4 @@
-# HandNet 
+# HandNet 2022
 
 
 ## Handwriting Recognition System with a neural network written from scratch using just numpy.  
